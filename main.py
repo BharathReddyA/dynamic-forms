@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 import motor.motor_asyncio
 from bson import ObjectId
@@ -24,11 +24,15 @@ collection = database.get_collection("form_data")
 
 # Pydantic models
 class FormDataBase(BaseModel):
-    first_name: Optional[str]
-    last_name: Optional[str]
-    email: Optional[str]
-    phone_number: Optional[str]
-    location: Optional[str]
+    first_name: str
+    last_name: str
+    email: EmailStr  
+    phone_number: str = Field(
+        pattern=r'^\+?[1-9]\d{9}$')  
+    location: str
+
+    class Config:
+        from_attributes = True
 
 class FormDataCreate(FormDataBase):
     pass
@@ -37,7 +41,7 @@ class FormData(FormDataBase):
     id: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Helper function to serialize MongoDB document
 def form_data_helper(form_data) -> dict:
