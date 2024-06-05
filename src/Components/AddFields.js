@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, FormControl, InputGroup, Form } from 'react-bootstrap';
 
+
 const AddFieldModal = ({ show, handleClose, handleAddField }) => {
   const [fieldName, setFieldName] = useState('');
   const [fieldType, setFieldType] = useState('text');
@@ -44,7 +45,7 @@ const AddFieldModal = ({ show, handleClose, handleAddField }) => {
               {/* Add more types as needed */}
             </Form.Select>
           </InputGroup>
-          <Button type="submit">Add Field</Button>
+          <Button type="submit" className='CustomButton M5'>Add Field</Button>
         </Form>
       </Modal.Body>
     </Modal>

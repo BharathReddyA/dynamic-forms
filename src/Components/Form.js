@@ -95,7 +95,7 @@ export default function Form() {
           </Col>
           <Col className="ButtonSection">
             <DateRange />
-            <Button onClick={() => setShowModal(true)}>Add Fields</Button>
+            <Button onClick={() => setShowModal(true)} className='CustomButton M5'>Add Fields</Button>
           </Col>
         </Row>
         <form onSubmit={handleSubmit}>
