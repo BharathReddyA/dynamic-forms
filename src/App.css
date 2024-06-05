@@ -13,17 +13,6 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
 .App-link {
   color: #61dafb;
 }
@@ -35,4 +24,55 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Custom CSS Style components */
+
+.header {
+  background-color: #282c34;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.CustomCard {
+  min-height: 10vh;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 5px 5px 0px #6e6e6e;
+}
+
+.Block {
+  background-color: #282c34;
+  min-height: 10vh;
+}
+
+.CustomButton {
+  background-color: #282c34 !important;
+  box-shadow: 0px 2px 2px 0px #6e6e6e;
+  border-color: #282c34 !important;
+}
+
+.PX5 {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.MX5 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.ButtonSection{
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.M5{
+  margin: 5px;
 }
