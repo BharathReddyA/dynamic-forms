@@ -23,6 +23,8 @@ export default function Form() {
     location: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -30,22 +32,45 @@ export default function Form() {
     });
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.first_name) newErrors.first_name = "First name is required";
+    if (!formData.last_name) newErrors.last_name = "Last name is required";
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email address is invalid";
+    }
+    if (!formData.phone_number) {
+      newErrors.phone_number = "Phone number is required";
+    } else if (!/^\+?[1-9]\d{9}$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Phone number is invalid";
+    }
+    if (!formData.location) newErrors.location = "Location is required";
+    return newErrors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch("http://127.0.0.1:8000/submit_form", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      fetch("http://127.0.0.1:8000/submit_form", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
   };
 
   return (
@@ -67,6 +92,7 @@ export default function Form() {
             name="first_name"
             value={formData.first_name}
             onChange={handleChange}
+            error={errors.first_name}
           />
           <Field
             FieldName="Last name"
@@ -74,6 +100,7 @@ export default function Form() {
             name="last_name"
             value={formData.last_name}
             onChange={handleChange}
+            error={errors.last_name}
           />
           <Field
             FieldName="Email"
@@ -81,6 +108,7 @@ export default function Form() {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            error={errors.email}
           />
           <Field
             FieldName="Phone number"
@@ -88,6 +116,7 @@ export default function Form() {
             name="phone_number"
             value={formData.phone_number}
             onChange={handleChange}
+            error={errors.phone_number}
           />
           <Row className="MX5">
             <Col lg={2}>
@@ -108,6 +137,7 @@ export default function Form() {
                   onChange={handleChange}
                 />
               </InputGroup>
+              {errors.location && <p className="text-danger">{errors.location}</p>}
             </Col>
           </Row>
           <Row>
