@@ -8,7 +8,7 @@ import {
   InputGroup,
   FormControl,
 } from "react-bootstrap";
-import AddFields from "./AddFields";
+import AddFieldModal from "./AddFields";
 import DateRange from "./DateRange";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
@@ -24,12 +24,19 @@ export default function Form() {
   });
 
   const [errors, setErrors] = useState({});
+  const [showModal, setShowModal] = useState(false);
+  const [dynamicFields, setDynamicFields] = useState([]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleAddField = (name, type) => {
+    setDynamicFields([...dynamicFields, { name, type }]);
+    setFormData({ ...formData, [name]: "" });
   };
 
   const validate = () => {
@@ -47,6 +54,12 @@ export default function Form() {
       newErrors.phone_number = "Phone number is invalid";
     }
     if (!formData.location) newErrors.location = "Location is required";
+    // Validate dynamic fields
+    dynamicFields.forEach((field) => {
+      if (!formData[field.name]) {
+        newErrors[field.name] = `${field.name} is required`;
+      }
+    });
     return newErrors;
   };
 
@@ -82,7 +95,7 @@ export default function Form() {
           </Col>
           <Col className="ButtonSection">
             <DateRange />
-            <AddFields />
+            <Button onClick={() => setShowModal(true)}>Add Fields</Button>
           </Col>
         </Row>
         <form onSubmit={handleSubmit}>
@@ -140,6 +153,17 @@ export default function Form() {
               {errors.location && <p className="text-danger">{errors.location}</p>}
             </Col>
           </Row>
+          {dynamicFields.map((field) => (
+            <Field
+              key={field.name}
+              FieldName={field.name}
+              FieldType={field.type}
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              error={errors[field.name]}
+            />
+          ))}
           <Row>
             <Col className="ButtonSection">
               <Button className="CustomButton M5" type="submit">Submit</Button>
@@ -148,6 +172,11 @@ export default function Form() {
           </Row>
         </form>
       </Card>
+      <AddFieldModal
+        show={showModal}
+        handleClose={() => setShowModal(false)}
+        handleAddField={handleAddField}
+      />
     </div>
   );
 }

@@ -1,61 +1,54 @@
 import React, { useState } from 'react';
-import { Modal, Button, Row, Col } from 'react-bootstrap';
+import { Modal, Button, FormControl, InputGroup, Form } from 'react-bootstrap';
 
-function AddFields() {
-  const [show, setShow] = useState(false);
+const AddFieldModal = ({ show, handleClose, handleAddField }) => {
+  const [fieldName, setFieldName] = useState('');
+  const [fieldType, setFieldType] = useState('text');
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleAddField(fieldName, fieldType);
+    setFieldName('');
+    setFieldType('text');
+    handleClose();
+  };
 
   return (
-    <>
-      <Button className='CustomButton M5' onClick={handleShow}>
-        Add Fields
-      </Button>
-
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Define fields</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-        <Row className="MX5">
-          {" "}
-          <Col lg={3}>
-            <label>Label name</label>
-          </Col>
-          <Col lg={7}>
-            <input
+    <Modal show={show} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Field</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={onSubmit}>
+          <InputGroup className="mb-3">
+            <InputGroup.Text>Field Name</InputGroup.Text>
+            <FormControl
               type="text"
-              className="form-control"
-              placeholder="First name"
+              placeholder="Enter field name"
+              value={fieldName}
+              onChange={(e) => setFieldName(e.target.value)}
+              required
             />
-          </Col>
-        </Row>
-        <Row className="MX5">
-          {" "}
-          <Col lg={3}>
-            <label>Label type</label>
-          </Col>
-          <Col lg={7}>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="First name"
-            />
-          </Col>
-        </Row>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button className='CustomButton' onClick={handleClose}>
-            Close
-          </Button>
-          <Button className='CustomButton' onClick={handleClose}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <InputGroup.Text>Field Type</InputGroup.Text>
+            <Form.Select
+              value={fieldType}
+              onChange={(e) => setFieldType(e.target.value)}
+            >
+              <option value="text">Text</option>
+              <option value="email">Email</option>
+              <option value="tel">Phone Number</option>
+              <option value="number">Number</option>
+              <option value="date">Date</option>
+              {/* Add more types as needed */}
+            </Form.Select>
+          </InputGroup>
+          <Button type="submit">Add Field</Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
   );
-}
+};
 
-export default AddFields;
+export default AddFieldModal;
