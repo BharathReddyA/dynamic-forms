@@ -21,6 +21,7 @@ export default function Form() {
     email: "",
     phone_number: "",
     location: "",
+    dynamic_fields: {},
   });
 
   const [errors, setErrors] = useState({});
@@ -28,15 +29,27 @@ export default function Form() {
   const [dynamicFields, setDynamicFields] = useState([]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    if (dynamicFields.some((field) => field.name === name)) {
+      setFormData({
+        ...formData,
+        dynamic_fields: { ...formData.dynamic_fields, [name]: value },
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleAddField = (name, type) => {
-    setDynamicFields([...dynamicFields, { name, type }]);
-    setFormData({ ...formData, [name]: "" });
+    const newField = { name, type };
+    setDynamicFields([...dynamicFields, newField]);
+    setFormData({
+      ...formData,
+      dynamic_fields: { ...formData.dynamic_fields, [name]: "" },
+    });
   };
 
   const validate = () => {
@@ -56,7 +69,7 @@ export default function Form() {
     if (!formData.location) newErrors.location = "Location is required";
     // Validate dynamic fields
     dynamicFields.forEach((field) => {
-      if (!formData[field.name]) {
+      if (!formData.dynamic_fields[field.name]) {
         newErrors[field.name] = `${field.name} is required`;
       }
     });
@@ -86,6 +99,19 @@ export default function Form() {
     }
   };
 
+  const handleCancel = () => {
+    setFormData({
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone_number: "",
+      location: "",
+      dynamic_fields: {},
+    });
+    setDynamicFields([]);
+    setErrors({});
+  };
+
   return (
     <div>
       <Card className="CustomCard">
@@ -95,7 +121,9 @@ export default function Form() {
           </Col>
           <Col className="ButtonSection">
             <DateRange />
-            <Button onClick={() => setShowModal(true)} className='CustomButton M5'>Add Fields</Button>
+            <Button onClick={() => setShowModal(true)} className="CustomButton M5">
+              Add Fields
+            </Button>
           </Col>
         </Row>
         <form onSubmit={handleSubmit}>
@@ -159,7 +187,7 @@ export default function Form() {
               FieldName={field.name}
               FieldType={field.type}
               name={field.name}
-              value={formData[field.name]}
+              value={formData.dynamic_fields[field.name]}
               onChange={handleChange}
               error={errors[field.name]}
             />
@@ -167,7 +195,7 @@ export default function Form() {
           <Row>
             <Col className="ButtonSection">
               <Button className="CustomButton M5" type="submit">Submit</Button>
-              <Button className="CustomButton M5" type="button">Cancel</Button>
+              <Button className="CustomButton M5" type="button" onClick={handleCancel}>Cancel</Button>
             </Col>
           </Row>
         </form>
