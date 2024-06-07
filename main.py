@@ -20,7 +20,8 @@ app.add_middleware(
 MONGO_DETAILS = "mongodb://localhost:27017"
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 database = client.form_data_db
-collection = database.get_collection("form_data")
+form_collection = database.get_collection("form_data")
+date_range_collection = database.get_collection("date_range")
 
 # Pydantic models
 class FormDataBase(BaseModel):
@@ -38,12 +39,29 @@ class FormDataCreate(FormDataBase):
     pass
 
 class FormData(FormDataBase):
-    id: Optional[str]
+    id: str
 
     class Config:
         from_attributes = True
+        
+# DateRange Model
+class DateRangeBase(BaseModel):
+    startDate: str
+    endDate: str
+    
+    class Config: 
+        from_attributes = True
+        
+class DateRangeCreate(DateRangeBase):
+    pass
+        
+class DateRange(DateRangeBase):
+    id: str
+    
+    class Config:
+        from_attributes = True
 
-# Helper function to serialize MongoDB document
+# Helper functions to serialize MongoDB documents
 def form_data_helper(form_data) -> dict:
     return {
         "id": str(form_data["_id"]),
@@ -54,12 +72,26 @@ def form_data_helper(form_data) -> dict:
         "location": form_data["location"],
     }
 
+def date_range_helper(date_range) -> dict:
+    return {
+        "id": str(date_range["_id"]),
+        "startDate": date_range["startDate"],
+        "endDate": date_range["endDate"],
+    }
+
 @app.post("/submit_form", response_model=FormData)
 async def submit_form(data: FormDataCreate):
     form_data = data.dict()
-    result = await collection.insert_one(form_data)
-    new_form_data = await collection.find_one({"_id": result.inserted_id})
+    result = await form_collection.insert_one(form_data)
+    new_form_data = await form_collection.find_one({"_id": result.inserted_id})
     return form_data_helper(new_form_data)
+
+@app.post('/date_range', response_model=DateRange)
+async def submit_date_range(data: DateRangeCreate):
+    date_range = data.dict()
+    result = await date_range_collection.insert_one(date_range)
+    new_date_range = await date_range_collection.find_one({"_id": result.inserted_id})
+    return date_range_helper(new_date_range)
 
 if __name__ == "__main__":
     import uvicorn
