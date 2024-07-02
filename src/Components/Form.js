@@ -1,55 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../App.css";
-import {
-  Card,
-  Button,
-  Row,
-  Col,
-  InputGroup,
-  FormControl,
-} from "react-bootstrap";
-import AddFieldModal from "./AddFields";
-import DateRange from "./DateRange";
+import { Card, Button, Row, Col, InputGroup, FormControl } from "react-bootstrap";
+import AddFieldModal from "./AddFields"; // Ensure the correct import path
+import DateRange from "./DateRange"; // Ensure the correct import path
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
-import Field from "./Field";
+import Field from "./Field"; // Ensure the correct import path
 
-export default function Form() {
+export default function Form({ role }) {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
     phone_number: "",
     location: "",
+    role: role,
     dynamic_fields: {},
   });
 
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [dynamicFields, setDynamicFields] = useState([]);
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+
+  useEffect(() => {
+    if (dateRange.startDate && dateRange.endDate) {
+      fetch(
+        `http://127.0.0.1:8000/get_fields_by_date_range?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`
+      )
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error("Failed to load fields");
+          }
+        })
+        .then((fields) => {
+          setDynamicFields(fields);
+          const newDynamicData = {};
+          fields.forEach((field) => {
+            newDynamicData[field.name] = "";
+          });
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            dynamic_fields: newDynamicData,
+          }));
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  }, [dateRange]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (dynamicFields.some((field) => field.name === name)) {
-      setFormData({
-        ...formData,
-        dynamic_fields: { ...formData.dynamic_fields, [name]: value },
-      });
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        dynamic_fields: { ...prevFormData.dynamic_fields, [name]: value },
+      }));
     } else {
-      setFormData({
-        ...formData,
+      setFormData((prevFormData) => ({
+        ...prevFormData,
         [name]: value,
-      });
+      }));
     }
   };
 
   const handleAddField = (name, type) => {
     const newField = { name, type };
     setDynamicFields([...dynamicFields, newField]);
-    setFormData({
-      ...formData,
-      dynamic_fields: { ...formData.dynamic_fields, [name]: "" },
-    });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      dynamic_fields: { ...prevFormData.dynamic_fields, [name]: "" },
+    }));
+
+    // Save the dynamic field to the database
+    fetch("http://127.0.0.1:8000/save_date_range", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...dateRange,
+        fields: [...dynamicFields, newField],
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Dynamic field saved:", data);
+      })
+      .catch((error) => {
+        console.error("Error saving dynamic field:", error);
+      });
   };
 
   const validate = () => {
@@ -92,6 +135,17 @@ export default function Form() {
         .then((response) => response.json())
         .then((data) => {
           console.log("Success:", data);
+          setFormData({
+            first_name: "",
+            last_name: "",
+            email: "",
+            phone_number: "",
+            location: "",
+            role: role, 
+            dynamic_fields: {},
+          });
+          setDynamicFields([]);
+          setErrors({});
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -106,6 +160,7 @@ export default function Form() {
       email: "",
       phone_number: "",
       location: "",
+      role: role,
       dynamic_fields: {},
     });
     setDynamicFields([]);
@@ -115,18 +170,19 @@ export default function Form() {
   return (
     <div>
       <Card className="CustomCard">
-        <Row style={{ marginBottom: 20 }}>
-          <Col>
-            <p>Welcome "Dynamic User"</p>
-          </Col>
-          <Col className="ButtonSection">
-            <DateRange />
-            <Button onClick={() => setShowModal(true)} className="CustomButton M5">
-              Add Fields
-            </Button>
-          </Col>
-        </Row>
+        {role === "Admin" && (
+          <Row style={{ marginBottom: 20 }}>
+            <Col></Col>
+            <Col className="ButtonSection">
+              <DateRange setDateRange={setDateRange} />
+              <Button onClick={() => setShowModal(true)} className="CustomButton M5">
+                Add Fields
+              </Button>
+            </Col>
+          </Row>
+        )}
         <form onSubmit={handleSubmit}>
+          {role}
           <Field
             FieldName="First name"
             FieldType="text"
@@ -194,8 +250,12 @@ export default function Form() {
           ))}
           <Row>
             <Col className="ButtonSection">
-              <Button className="CustomButton M5" type="submit">Submit</Button>
-              <Button className="CustomButton M5" type="button" onClick={handleCancel}>Cancel</Button>
+              <Button className="CustomButton M5" type="submit">
+                Submit
+              </Button>
+              <Button className="CustomButton M5" type="button" onClick={handleCancel}>
+                Cancel
+              </Button>
             </Col>
           </Row>
         </form>

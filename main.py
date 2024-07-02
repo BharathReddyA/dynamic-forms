@@ -31,6 +31,7 @@ class FormDataBase(BaseModel):
     phone_number: str = Field(
         pattern=r'^\+?[1-9]\d{9}$')  
     location: str
+    role: str
 
     class Config:
         from_attributes = True
@@ -70,6 +71,7 @@ def form_data_helper(form_data) -> dict:
         "email": form_data["email"],
         "phone_number": form_data["phone_number"],
         "location": form_data["location"],
+        "role": form_data["role"],
     }
 
 def date_range_helper(date_range) -> dict:
