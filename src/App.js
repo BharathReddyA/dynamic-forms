@@ -4,7 +4,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Nav } from "react-bootstrap";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Home from "./Screens/home";
-import Admin from "./Screens/AdminDashboard"; // Assuming you have an Admin component
+import Admin from "./Screens/AdminDashboard";
+import AddUser from "./Components/AddUser";
+import AddForms from "./Components/AddForms";
+import ViewForms from "./Components/ViewForms";
+import ViewUserFilledForms from "./Components/ViewUserFilledForms";
 
 function App() {
   return (
@@ -32,6 +36,13 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/add-user" element={<AddUser />} />
+            <Route path="/add-forms" element={<AddForms />} />
+            <Route path="/view-forms" element={<ViewForms />} />
+            <Route
+              path="/view-user-filled-forms"
+              element={<ViewUserFilledForms />}
+            />
           </Routes>
         </div>
       </div>
