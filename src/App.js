@@ -9,6 +9,8 @@ import AddUser from "./Components/AddUser";
 import AddForms from "./Components/AddForms";
 import ViewForms from "./Components/ViewForms";
 import ViewUserFilledForms from "./Components/ViewUserFilledForms";
+import CompanyRegistration from "./Screens/CompanyRegistration";
+import CompanyLogin from "./Screens/CompanyLogin";
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
             <Route path="/add-user" element={<AddUser />} />
             <Route path="/add-forms" element={<AddForms />} />
             <Route path="/view-forms" element={<ViewForms />} />
+            <Route path="/CompanyRegistration" element={<CompanyRegistration />} />
+            <Route path="/CompanyLogin" element={<CompanyLogin />} />
             <Route
               path="/view-user-filled-forms"
               element={<ViewUserFilledForms />}

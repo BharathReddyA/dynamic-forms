@@ -3,7 +3,7 @@ import "../App.css";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
 import Field from "../Components/Field.js";
 
-export default function CompanyRegistration() {
+export default function CompanyLogin() {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -85,23 +85,15 @@ export default function CompanyRegistration() {
   return (
     <Container className="pt-5">
       <Card className="CustomCard">
-        <h3 className="pb-5">Company Registration</h3>
+        <h3 className="pb-5">Company Login</h3>
         <form onSubmit={handleSubmit}>
           <Field
-            FieldName="First name"
+            FieldName="Company ID"
             FieldType="text"
-            name="first_name"
-            value={formData.first_name}
+            name="companyID"
+            value={formData.companyID}
             onChange={handleChange}
-            error={errors.first_name}
-          />
-          <Field
-            FieldName="Last name"
-            FieldType="text"
-            name="last_name"
-            value={formData.last_name}
-            onChange={handleChange}
-            error={errors.last_name}
+            error={errors.companyID}
           />
           <Field
             FieldName="Email"
@@ -112,20 +104,12 @@ export default function CompanyRegistration() {
             error={errors.email}
           />
           <Field
-            FieldName="Phone number"
-            FieldType="tel"
-            name="phone_number"
-            value={formData.phone_number}
-            onChange={handleChange}
-            error={errors.phone_number}
-          />
-          <Field
-            FieldName="Company"
+            FieldName="Password"
             FieldType="text"
-            name="company"
-            value={formData.company}
+            name="password"
+            value={formData.password}
             onChange={handleChange}
-            error={errors.company}
+            error={errors.password}
           />
           <Row>
             <Col className="ButtonSection">
