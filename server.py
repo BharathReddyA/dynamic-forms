@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 import motor.motor_asyncio
 from bson import ObjectId
@@ -63,6 +64,17 @@ class VerifyUserRequest(BaseModel):
     email: EmailStr
     verification_code: str
 
+class FormField(BaseModel):
+    name: str
+    type: str
+
+class DynamicForm(BaseModel):
+    title: str
+    description: str
+    fields: Dict[str,  Dict[str, str]]
+    date_range: Dict[str, str]
+    company_id: str
+
 # Helper functions
 def user_helper(user) -> dict:
     return {
@@ -74,6 +86,16 @@ def user_helper(user) -> dict:
         "company": user["company"],
         "company_id": user.get("company_id"),
         "email_verified": user.get("email_verified", False),
+    }
+    
+def form_helper(form) -> dict:
+    return {
+        "id": str(form["_id"]),
+        "title": form["title"],
+        "description": form["description"],
+        "fields": form["fields"],
+        "date_range": form["date_range"],
+        "company_id": form["company_id"]
     }
 
 async def update_email_verification_status(email: str):
@@ -190,6 +212,35 @@ async def login_user(data: UserLogin, company_id: str):
         )
     except ClientError as e:
         raise HTTPException(status_code=400, detail=e.response['Error']['Message'])
+
+# API Endpoint for creating a dynamic form
+@app.post("/dynamic_form")
+async def create_dynamic_form(form: DynamicForm):
+    form_data = form.dict()
+    result = await form_collection.insert_one(form_data)
+    if result.inserted_id:
+        return {"status": "Success", "message": "Form created successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to create form")
+
+
+@app.get("/dynamic_forms_by_date")
+async def get_dynamic_forms_by_date(start_date: str = Query(...), end_date: str = Query(...)):
+    forms = []
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+
+    async for form in form_collection.find():
+        form_start = datetime.strptime(form["date_range"]["startDate"], "%Y-%m-%d")
+        form_end = datetime.strptime(form["date_range"]["endDate"], "%Y-%m-%d")
+
+        if start_date_obj <= form_start <= end_date_obj or start_date_obj <= form_end <= end_date_obj:
+            forms.append(form_helper(form))
+
+    if not forms:
+        raise HTTPException(status_code=404, detail="No forms found in the specified date range")
+
+    return forms
 
 if __name__ == "__main__":
     import uvicorn

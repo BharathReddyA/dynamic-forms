@@ -46,7 +46,7 @@ function App() {
                       <Nav.Link className="NavLink mx-1" as={Link} to="/view-user-filled-forms">
                         View User Filled Forms
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" onClick={handleLogout}>
+                      <Nav.Link className="NavLink mx-1" onClick={handleLogout} as={Link} to="/">
                         Logout
                       </Nav.Link>
                     </>
