@@ -48,13 +48,13 @@ export default function AddUser() {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      fetch("http://127.0.0.1:8000/submit_form", {
+      fetch("http://127.0.0.1:8000/submit_user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      })      
         .then((response) => response.json())
         .then((data) => {
           console.log("Success:", data);

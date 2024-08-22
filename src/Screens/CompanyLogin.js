@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import "../App.css";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
 import Field from "../Components/Field.js";
+import { useNavigate } from "react-router-dom";
 
-export default function CompanyLogin() {
+export default function CompanyLogin({ setIsLoggedIn }) { // Receive setIsLoggedIn from props
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    companyID: "",
     email: "",
-    phone_number: "",
-    company: "",
+    password: "",
   });
+
+  const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
 
@@ -24,19 +25,13 @@ export default function CompanyLogin() {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.first_name) newErrors.first_name = "First name is required";
-    if (!formData.last_name) newErrors.last_name = "Last name is required";
+    if (!formData.companyID) newErrors.companyID = "Company ID is required";
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email address is invalid";
     }
-    if (!formData.phone_number) {
-      newErrors.phone_number = "Phone number is required";
-    } else if (!/^\+?[1-9]\d{9}$/.test(formData.phone_number)) {
-      newErrors.phone_number = "Phone number is invalid";
-    }
-    if (!formData.company) newErrors.company = "Company is required";
+    if (!formData.password) newErrors.password = "Password is required";
     return newErrors;
   };
 
@@ -46,38 +41,45 @@ export default function CompanyLogin() {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      fetch("http://127.0.0.1:8000/company_registration", {
+      fetch(`http://127.0.0.1:8000/login_user?company_id=${formData.companyID}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Login failed"); // Handle HTTP errors
+          }
+          return response.json();
+        })
         .then((data) => {
           console.log("Success:", data);
+          setIsLoggedIn(true); // Update the login state in the parent component
           setFormData({
-            first_name: "",
-            last_name: "",
+            companyID: "",
             email: "",
-            phone_number: "",
-            company: "",
+            password: "",
           });
           setErrors({});
+          navigate("/"); // Redirect to the home page after successful login
         })
         .catch((error) => {
           console.error("Error:", error);
+          setErrors({ form: "Invalid login credentials" }); // Display a general error message
         });
     }
   };
 
   const handleCancel = () => {
     setFormData({
-      first_name: "",
-      last_name: "",
+      companyID: "",
       email: "",
-      phone_number: "",
-      company: "",
+      password: "",
     });
     setErrors({});
   };
@@ -105,12 +107,13 @@ export default function CompanyLogin() {
           />
           <Field
             FieldName="Password"
-            FieldType="text"
+            FieldType="password"  // Secure password input
             name="password"
             value={formData.password}
             onChange={handleChange}
             error={errors.password}
           />
+          {errors.form && <p className="text-danger">{errors.form}</p>} {/* Display form-level error */}
           <Row>
             <Col className="ButtonSection">
               <Button className="CustomButton M5" type="submit">

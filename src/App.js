@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Nav } from "react-bootstrap";
@@ -8,11 +8,20 @@ import Admin from "./Screens/AdminDashboard";
 import AddUser from "./Components/AddUser";
 import AddForms from "./Components/AddForms";
 import ViewForms from "./Components/ViewForms";
+import VerifyAccount from "./Components/VerifyAccount";
 import ViewUserFilledForms from "./Components/ViewUserFilledForms";
 import CompanyRegistration from "./Screens/CompanyRegistration";
 import CompanyLogin from "./Screens/CompanyLogin";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    // Clear any tokens or user data from storage here if needed
+    localStorage.removeItem("authToken");
+  };
+
   return (
     <Router>
       <div>
@@ -22,13 +31,35 @@ function App() {
               <Navbar.Brand>Dynamic Forms</Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="ml-auto">
-                  <Nav.Link as={Link} to="/">
-                    Home
-                  </Nav.Link>
-                  <Nav.Link as={Link} to="/admin">
-                    Admin
-                  </Nav.Link>
+                <Nav className="ms-auto">
+                  {isLoggedIn ? (
+                    <>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/add-user">
+                        Add Users
+                      </Nav.Link>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/add-forms">
+                        Add Forms
+                      </Nav.Link>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/view-forms">
+                        View Forms
+                      </Nav.Link>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/view-user-filled-forms">
+                        View User Filled Forms
+                      </Nav.Link>
+                      <Nav.Link className="NavLink mx-1" onClick={handleLogout}>
+                        Logout
+                      </Nav.Link>
+                    </>
+                  ) : (
+                    <>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/CompanyRegistration">
+                        Company Registration
+                      </Nav.Link>
+                      <Nav.Link className="NavLink mx-1" as={Link} to="/CompanyLogin">
+                        Company Login
+                      </Nav.Link>
+                    </>
+                  )}
                 </Nav>
               </Navbar.Collapse>
             </Container>
@@ -41,12 +72,13 @@ function App() {
             <Route path="/add-user" element={<AddUser />} />
             <Route path="/add-forms" element={<AddForms />} />
             <Route path="/view-forms" element={<ViewForms />} />
+            <Route path="/verify-account" element={<VerifyAccount />} />
             <Route path="/CompanyRegistration" element={<CompanyRegistration />} />
-            <Route path="/CompanyLogin" element={<CompanyLogin />} />
             <Route
-              path="/view-user-filled-forms"
-              element={<ViewUserFilledForms />}
+              path="/CompanyLogin"
+              element={<CompanyLogin setIsLoggedIn={setIsLoggedIn} />}
             />
+            <Route path="/view-user-filled-forms" element={<ViewUserFilledForms />} />
           </Routes>
         </div>
       </div>

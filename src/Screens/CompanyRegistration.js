@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../App.css";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
 import Field from "../Components/Field.js";
+import {useNavigate} from "react-router-dom";
 
 export default function CompanyRegistration() {
   const [formData, setFormData] = useState({
@@ -10,7 +11,10 @@ export default function CompanyRegistration() {
     email: "",
     phone_number: "",
     company: "",
+    password: "",  // Add a field for password
   });
+
+  const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
 
@@ -33,10 +37,11 @@ export default function CompanyRegistration() {
     }
     if (!formData.phone_number) {
       newErrors.phone_number = "Phone number is required";
-    } else if (!/^\+?[1-9]\d{9}$/.test(formData.phone_number)) {
+    } else if (!/^\+?[1-9]\d{1,14}$/.test(formData.phone_number)) {
       newErrors.phone_number = "Phone number is invalid";
     }
     if (!formData.company) newErrors.company = "Company is required";
+    if (!formData.password) newErrors.password = "Password is required";
     return newErrors;
   };
 
@@ -46,12 +51,13 @@ export default function CompanyRegistration() {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      fetch("http://127.0.0.1:8000/company_registration", {
+      console.log("Form Data Sent:", formData); // Log the form data
+      fetch("http://127.0.0.1:8000/register_user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Ensure that formData is correctly structured
       })
         .then((response) => response.json())
         .then((data) => {
@@ -62,14 +68,17 @@ export default function CompanyRegistration() {
             email: "",
             phone_number: "",
             company: "",
+            password: "",  // Reset password field
           });
+          navigate("/verify-account", {state: {email: formData.email}});
           setErrors({});
         })
         .catch((error) => {
           console.error("Error:", error);
         });
     }
-  };
+};
+
 
   const handleCancel = () => {
     setFormData({
@@ -78,6 +87,7 @@ export default function CompanyRegistration() {
       email: "",
       phone_number: "",
       company: "",
+      password: "",  // Reset password field
     });
     setErrors({});
   };
@@ -126,6 +136,14 @@ export default function CompanyRegistration() {
             value={formData.company}
             onChange={handleChange}
             error={errors.company}
+          />
+          <Field
+            FieldName="Password"
+            FieldType="password"  // Secure password input
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
           />
           <Row>
             <Col className="ButtonSection">

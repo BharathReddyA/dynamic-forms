@@ -28,15 +28,29 @@
 
 /* Custom CSS Style components */
 
+.header .navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
 .header {
   background-color: #282c34;
-  min-height: 10vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  min-height: 8vh;
+  font-size: 2.5vh;
   color: white;
+}
+
+.NavLink {
+  background-color: #323741 !important;
+  box-shadow: 0px 1px 1px 0px #000000 !important;
+  border-radius: 5px !important;
+}
+.NavLink:hover {
+  background-color: #323741 !important;
+  box-shadow: 0px 2px 2px 0px #000000 !important;
+  border-radius: 10px !important;
 }
 
 .CustomCard {
