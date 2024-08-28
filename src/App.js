@@ -28,34 +28,65 @@ function App() {
         <header className="header">
           <Navbar variant="dark" expand="lg">
             <Container fluid>
-              <Navbar.Brand>Dynamic Forms</Navbar.Brand>
+              <Navbar.Brand as={Link} to="/">
+                Dynamic Forms
+              </Navbar.Brand>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="ms-auto">
                   {isLoggedIn ? (
                     <>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/add-user">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/add-user"
+                      >
                         Add Users
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/add-forms">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/add-forms"
+                      >
                         Add Forms
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/view-forms">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/view-forms"
+                      >
                         View Forms
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/view-user-filled-forms">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/view-user-filled-forms"
+                      >
                         View User Filled Forms
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" onClick={handleLogout} as={Link} to="/">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        onClick={handleLogout}
+                        as={Link}
+                        to="/"
+                      >
                         Logout
                       </Nav.Link>
                     </>
                   ) : (
                     <>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/CompanyRegistration">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/CompanyRegistration"
+                      >
                         Company Registration
                       </Nav.Link>
-                      <Nav.Link className="NavLink mx-1" as={Link} to="/CompanyLogin">
+                      <Nav.Link
+                        className="NavLink mx-1"
+                        as={Link}
+                        to="/CompanyLogin"
+                      >
                         Company Login
                       </Nav.Link>
                     </>
@@ -67,18 +98,29 @@ function App() {
         </header>
         <div>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route
+              path="/"
+              element={
+                <Home isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+              }
+            />
             <Route path="/admin" element={<Admin />} />
             <Route path="/add-user" element={<AddUser />} />
             <Route path="/add-forms" element={<AddForms />} />
             <Route path="/view-forms" element={<ViewForms />} />
             <Route path="/verify-account" element={<VerifyAccount />} />
-            <Route path="/CompanyRegistration" element={<CompanyRegistration />} />
+            <Route
+              path="/CompanyRegistration"
+              element={<CompanyRegistration />}
+            />
             <Route
               path="/CompanyLogin"
               element={<CompanyLogin setIsLoggedIn={setIsLoggedIn} />}
             />
-            <Route path="/view-user-filled-forms" element={<ViewUserFilledForms />} />
+            <Route
+              path="/view-user-filled-forms"
+              element={<ViewUserFilledForms />}
+            />
           </Routes>
         </div>
       </div>

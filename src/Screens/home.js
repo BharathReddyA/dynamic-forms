@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 
-export default function Home() {
+export default function Home({ isLoggedIn, setIsLoggedIn }) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is logged in by looking for the auth token
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, [setIsLoggedIn]);
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -12,43 +20,57 @@ export default function Home() {
 
   return (
     <div style={{ marginTop: 50 }}>
-      <Container>
-        {/* Landing Page Intro Section */}
-        <Row className="mb-5">
-          <Col>
-            <Card className="p-4 text-center">
-              <h1>Welcome to Dynamic Forms</h1>
-              <p>
-                Our platform allows you to manage forms, collect data, and more.
-                If you are a company, start by registering your organization or log in to manage your forms.
-              </p>
-              <p>
-                Select an option below to get started!
-              </p>
-            </Card>
-          </Col>
-        </Row>
+      {isLoggedIn ? (
+        <>
+          <Container>
+            <Row className="mb-5">
+              <Col>
+                <Card className="p-4 text-center">
+                  <h1>Welcome Back!</h1>
+                  <p>
+                    You are logged in. Use the navigation above to manage your forms and users.
+                  </p>
+                </Card>
+              </Col>
+            </Row>
+          </Container>
+        </>
+      ) : (
+        <>
+          <Container>
+            <Row className="mb-5">
+              <Col>
+                <Card className="p-4 text-center">
+                  <h1>Welcome to Dynamic Forms</h1>
+                  <p>
+                    Our platform allows you to manage forms, collect data, and more. If you are a company, start by registering your organization or log in to manage your forms.
+                  </p>
+                  <p>Select an option below to get started!</p>
+                </Card>
+              </Col>
+            </Row>
 
-        {/* Company Registration and Login Buttons */}
-        <Row className="mb-4">
-          <Col className="text-center">
-            <Button
-              className="CustomButton M5"
-              type="button"
-              onClick={() => handleNavigation("/CompanyRegistration")}
-            >
-              Company Registration
-            </Button>
-            <Button
-              className="CustomButton M5"
-              type="button"
-              onClick={() => handleNavigation("/CompanyLogin")}
-            >
-              Company Login
-            </Button>
-          </Col>
-        </Row>
-      </Container>
+            <Row className="mb-4">
+              <Col className="text-center">
+                <Button
+                  className="CustomButton M5"
+                  type="button"
+                  onClick={() => handleNavigation("/CompanyRegistration")}
+                >
+                  Company Registration
+                </Button>
+                <Button
+                  className="CustomButton M5"
+                  type="button"
+                  onClick={() => handleNavigation("/CompanyLogin")}
+                >
+                  Company Login
+                </Button>
+              </Col>
+            </Row>
+          </Container>
+        </>
+      )}
     </div>
   );
 }
