@@ -7,6 +7,7 @@ import motor.motor_asyncio
 from bson import ObjectId
 import boto3
 from botocore.exceptions import ClientError
+import logging
 
 app = FastAPI()
 
@@ -224,23 +225,27 @@ async def create_dynamic_form(form: DynamicForm):
         raise HTTPException(status_code=500, detail="Failed to create form")
 
 
-@app.get("/dynamic_forms_by_date")
-async def get_dynamic_forms_by_date(start_date: str = Query(...), end_date: str = Query(...)):
-    forms = []
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+@app.get("/dynamic_forms_by_company_and_date")
+async def get_dynamic_forms_by_company_and_date(company_id: str, start_date: str, end_date: str):
+    try:
+        # No need to convert start_date and end_date to datetime objects since they are strings in the database
+        logging.info(f"Company ID: {company_id}")
+        logging.info(f"Start Date: {start_date}")
+        logging.info(f"End Date: {end_date}")
 
-    async for form in form_collection.find():
-        form_start = datetime.strptime(form["date_range"]["startDate"], "%Y-%m-%d")
-        form_end = datetime.strptime(form["date_range"]["endDate"], "%Y-%m-%d")
+        forms = []
+        async for form in form_collection.find({
+            "company_id": company_id,
+            "date_range.startDate": {"$gte": start_date},
+            "date_range.endDate": {"$lte": end_date}
+        }):
+            form["_id"] = str(form["_id"])  # Convert ObjectId to string
+            forms.append(form)
 
-        if start_date_obj <= form_start <= end_date_obj or start_date_obj <= form_end <= end_date_obj:
-            forms.append(form_helper(form))
-
-    if not forms:
-        raise HTTPException(status_code=404, detail="No forms found in the specified date range")
-
-    return forms
+        logging.info(f"Forms found: {len(forms)}")
+        return forms
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

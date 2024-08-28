@@ -3,8 +3,10 @@ import "../App.css";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
 import Field from "../Components/Field.js";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { setCompanyId } from '../actions/companyActions';
 
-export default function CompanyLogin({ setIsLoggedIn }) { // Receive setIsLoggedIn from props
+export default function CompanyLogin({ setIsLoggedIn }) {
   const [formData, setFormData] = useState({
     companyID: "",
     email: "",
@@ -12,7 +14,7 @@ export default function CompanyLogin({ setIsLoggedIn }) { // Receive setIsLogged
   });
 
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -53,24 +55,26 @@ export default function CompanyLogin({ setIsLoggedIn }) { // Receive setIsLogged
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Login failed"); // Handle HTTP errors
+            throw new Error("Login failed");
           }
           return response.json();
         })
         .then((data) => {
+          const companyId = formData.companyID;
           console.log("Success:", data);
-          setIsLoggedIn(true); // Update the login state in the parent component
+          setIsLoggedIn(true);
           setFormData({
             companyID: "",
             email: "",
             password: "",
           });
+          dispatch(setCompanyId(companyId));
           setErrors({});
-          navigate("/"); // Redirect to the home page after successful login
+          navigate("/");
         })
         .catch((error) => {
           console.error("Error:", error);
-          setErrors({ form: "Invalid login credentials" }); // Display a general error message
+          setErrors({ form: "Invalid login credentials" });
         });
     }
   };
@@ -107,13 +111,13 @@ export default function CompanyLogin({ setIsLoggedIn }) { // Receive setIsLogged
           />
           <Field
             FieldName="Password"
-            FieldType="password"  // Secure password input
+            FieldType="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             error={errors.password}
           />
-          {errors.form && <p className="text-danger">{errors.form}</p>} {/* Display form-level error */}
+          {errors.form && <p className="text-danger">{errors.form}</p>}
           <Row>
             <Col className="ButtonSection">
               <Button className="CustomButton M5" type="submit">

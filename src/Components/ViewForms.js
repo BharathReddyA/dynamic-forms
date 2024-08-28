@@ -1,20 +1,24 @@
 import React, { useState } from "react";
 import { Container, Form, Button, Row, Col } from "react-bootstrap";
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const ViewForms = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [forms, setForms] = useState([]);
 
+  const companyId = useSelector((state) => state.company.companyId);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await axios.get(
-        "http://127.0.0.1:8000/dynamic_forms_by_date",
+        "http://127.0.0.1:8000/dynamic_forms_by_company_and_date",
         {
           params: {
+            company_id: companyId,
             start_date: startDate,
             end_date: endDate,
           },

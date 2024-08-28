@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import FieldInput from './FieldInput';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const AddForms = () => {
+  const companyId = useSelector((state) => state.company.companyId); // Get the companyId from Redux store
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [fields, setFields] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [companyId, setCompanyId] = useState('');
 
   const addField = (field) => {
     setFields([...fields, field]);
@@ -36,7 +37,6 @@ const AddForms = () => {
       setFields([]);
       setStartDate('');
       setEndDate('');
-      setCompanyId('');
     } catch (error) {
       console.error('Error creating form:', error);
     }
@@ -95,9 +95,8 @@ const AddForms = () => {
           <Form.Label>Company ID</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Enter company ID"
-            value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
+            value={companyId}  // Automatically set the value from Redux
+            disabled           // Disable the field so the user can't change it
             required
           />
         </Form.Group>
