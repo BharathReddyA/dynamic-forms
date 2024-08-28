@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Nav } from "react-bootstrap";
@@ -12,116 +12,98 @@ import VerifyAccount from "./Components/VerifyAccount";
 import ViewUserFilledForms from "./Components/ViewUserFilledForms";
 import CompanyRegistration from "./Screens/CompanyRegistration";
 import CompanyLogin from "./Screens/CompanyLogin";
+import CompanyProfile from "./Screens/CompanyProfile";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   const handleLogout = () => {
     setIsLoggedIn(false);
-    // Clear any tokens or user data from storage here if needed
     localStorage.removeItem("authToken");
   };
 
   return (
     <Router>
-      <div>
-        <header className="header">
-          <Navbar variant="dark" expand="lg">
-            <Container fluid>
-              <Navbar.Brand as={Link} to="/">
-                Dynamic Forms
-              </Navbar.Brand>
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="ms-auto">
-                  {isLoggedIn ? (
-                    <>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/add-user"
-                      >
-                        Add Users
-                      </Nav.Link>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/add-forms"
-                      >
-                        Add Forms
-                      </Nav.Link>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/view-forms"
-                      >
-                        View Forms
-                      </Nav.Link>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/view-user-filled-forms"
-                      >
-                        View User Filled Forms
-                      </Nav.Link>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        onClick={handleLogout}
-                        as={Link}
-                        to="/"
-                      >
-                        Logout
-                      </Nav.Link>
-                    </>
-                  ) : (
-                    <>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/CompanyRegistration"
-                      >
-                        Company Registration
-                      </Nav.Link>
-                      <Nav.Link
-                        className="NavLink mx-1"
-                        as={Link}
-                        to="/CompanyLogin"
-                      >
-                        Company Login
-                      </Nav.Link>
-                    </>
-                  )}
-                </Nav>
-              </Navbar.Collapse>
-            </Container>
-          </Navbar>
-        </header>
-        <div>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Home isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-              }
-            />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/add-user" element={<AddUser />} />
-            <Route path="/add-forms" element={<AddForms />} />
-            <Route path="/view-forms" element={<ViewForms />} />
-            <Route path="/verify-account" element={<VerifyAccount />} />
-            <Route
-              path="/CompanyRegistration"
-              element={<CompanyRegistration />}
-            />
-            <Route
-              path="/CompanyLogin"
-              element={<CompanyLogin setIsLoggedIn={setIsLoggedIn} />}
-            />
-            <Route
-              path="/view-user-filled-forms"
-              element={<ViewUserFilledForms />}
-            />
-          </Routes>
+      <div className="app-layout">
+        {isLoggedIn && (
+          <nav className="side-nav">
+            <Link to="/add-user">Add Users</Link>
+            <Link to="/add-forms">Add Forms</Link>
+            <Link to="/view-forms">View Forms</Link>
+            <Link to="/view-user-filled-forms">View User Filled Forms</Link>
+            <Link to="/" onClick={handleLogout}>
+              Logout
+            </Link>
+          </nav>
+        )}
+        <div className="main-content">
+          <div className="top-nav">
+            <Navbar.Brand as={Link} to="/">
+              Dynamic Forms
+            </Navbar.Brand>
+            <Nav className="ms-auto">
+              {!isLoggedIn && (
+                <>
+                  <Nav.Link
+                    className="navLink"
+                    as={Link}
+                    to="/CompanyRegistration"
+                  >
+                    Company Registration
+                  </Nav.Link>
+                  <Nav.Link className="navLink" as={Link} to="/CompanyLogin">
+                    Company Login
+                  </Nav.Link>
+                </>
+              )}
+              {isLoggedIn && (
+                <>
+                  <Nav.Link className="navLink" as={Link} to="/add-user">
+                    Add Users
+                  </Nav.Link>
+                  <Nav.Link className="navLink" as={Link} to="/company-profile">
+                    Profile
+                  </Nav.Link>
+                </>
+              )}
+            </Nav>
+          </div>
+
+          <Container fluid>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Home isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+                }
+              />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/add-user" element={<AddUser />} />
+              <Route path="/add-forms" element={<AddForms />} />
+              <Route path="/view-forms" element={<ViewForms />} />
+              <Route path="/verify-account" element={<VerifyAccount />} />
+              <Route path="/company-profile" element={<CompanyProfile />} />
+              <Route
+                path="/CompanyRegistration"
+                element={<CompanyRegistration />}
+              />
+              <Route
+                path="/CompanyLogin"
+                element={<CompanyLogin setIsLoggedIn={setIsLoggedIn} />}
+              />
+              <Route
+                path="/view-user-filled-forms"
+                element={<ViewUserFilledForms />}
+              />
+            </Routes>
+          </Container>
         </div>
       </div>
     </Router>

@@ -34,19 +34,19 @@
   align-items: center;
 }
 
-
 .header {
   background-color: #282c34;
   min-height: 8vh;
-  font-size: 2.5vh;
-  color: white;
+  font-size: 2.1vh;
 }
 
 .NavLink {
   background-color: #323741 !important;
   box-shadow: 0px 1px 1px 0px #000000 !important;
   border-radius: 5px !important;
+  color: white !important;
 }
+
 .NavLink:hover {
   background-color: #323741 !important;
   box-shadow: 0px 2px 2px 0px #000000 !important;
@@ -81,12 +81,58 @@
   margin-bottom: 5px;
 }
 
-.ButtonSection{
+.ButtonSection {
   align-content: center;
   align-items: center;
   justify-content: center;
 }
 
-.M5{
+.M5 {
   margin: 5px;
+}
+
+/* Layout styles */
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.side-nav {
+  width: 200px;
+  background-color: #323741;
+  padding-top: 30px;
+}
+
+.side-nav a {
+  padding: 10px 15px;
+  text-decoration: none;
+  font-size: 18px;
+  color: white;
+  display: block;
+}
+
+.side-nav a:hover {
+  background-color: #575d69;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.top-nav {
+  background-color: #323741;
+  height: 60px;
+  padding: 0 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navLink {
+  color: white !important;
+}
+.navLink:hover {
+  background-color: #575d69 !important;
 }
