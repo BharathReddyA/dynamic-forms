@@ -35,6 +35,7 @@ function App() {
       <div className="app-layout">
         {isLoggedIn && (
           <nav className="side-nav">
+            <Link to="/">Home</Link>
             <Link to="/add-user">Add Users</Link>
             <Link to="/add-application">Add Application</Link>
             <Link to="/add-forms">Add Forms</Link>
@@ -67,6 +68,9 @@ function App() {
               )}
               {isLoggedIn && (
                 <>
+                  <Nav.Link className="navLink" as={Link} to="/">
+                    Home
+                  </Nav.Link>
                   <Nav.Link className="navLink" as={Link} to="/add-user">
                     Add Users
                   </Nav.Link>

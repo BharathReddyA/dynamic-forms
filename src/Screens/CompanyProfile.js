@@ -5,7 +5,7 @@ import "../App.css";
 import { useSelector } from "react-redux";
 
 export default function ProfilePage() {
-  const [formData, setFormData] = useState(null); // Start with null to handle the loading state
+  const [formData, setFormData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const companyId = useSelector((state) => state.company.companyId);

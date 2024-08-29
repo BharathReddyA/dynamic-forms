@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Row, Col } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap';
 import FieldInput from './FieldInput';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -43,7 +43,8 @@ const AddForms = () => {
   };
 
   return (
-    <Container>
+    <Container className="py-5">
+      <Card className="CustomCard">
       <h1>Create Dynamic Form</h1>
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="formTitle" className="mb-3">
@@ -113,6 +114,7 @@ const AddForms = () => {
           Create Form
         </Button>
       </Form>
+      </Card>
     </Container>
   );
 };

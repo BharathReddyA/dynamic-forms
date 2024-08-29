@@ -310,6 +310,19 @@ async def add_app(app: Application):
         return {"status": "Success", "message": "Application added successfully", "app_id": str(result.inserted_id)}
     else:
         raise HTTPException(status_code=500, detail="Failed to add application")
+    
+@app.get("/view_apps/{company_id}")
+async def get_apps_by_company(company_id: str):
+    try:
+        apps = []
+        async for app in app_collection.find({"company_id": company_id}):
+            apps.append(app_helper(app))
+        if apps:
+            return apps
+        else:
+            raise HTTPException(status_code=404, detail="No applications found for this company")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

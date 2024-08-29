@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Container, Row, Col, Button, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
+import DashboardApps from "../Components/DashboardApps";
 
 export default function Home({ isLoggedIn, setIsLoggedIn }) {
   const navigate = useNavigate();
@@ -25,11 +26,8 @@ export default function Home({ isLoggedIn, setIsLoggedIn }) {
           <Container>
             <Row className="mb-5">
               <Col>
-                <Card className="p-4 text-center">
-                  <h1>Welcome Back!</h1>
-                  <p>
-                    You are logged in. Use the navigation above to manage your forms and users.
-                  </p>
+                <Card className="p-4 text-center CustomCard">
+                  <DashboardApps/>
                 </Card>
               </Col>
             </Row>
@@ -40,7 +38,7 @@ export default function Home({ isLoggedIn, setIsLoggedIn }) {
           <Container>
             <Row className="mb-5">
               <Col>
-                <Card className="p-4 text-center">
+                <Card className="p-4 text-center CustomCard">
                   <h1>Welcome to Dynamic Forms</h1>
                   <p>
                     Our platform allows you to manage forms, collect data, and more. If you are a company, start by registering your organization or log in to manage your forms.
