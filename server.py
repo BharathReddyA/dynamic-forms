@@ -26,7 +26,8 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 database = client.form_data_db
 form_collection = database.get_collection("forms")
 filled_form_collection = database.get_collection("filled_forms")
-user_collection = database.get_collection("users")  # New collection for users
+user_collection = database.get_collection("users")
+app_collection = database.get_collection("applications")
 
 # AWS Cognito setup
 cognito_client = boto3.client('cognito-idp', region_name='us-west-2')  
@@ -75,6 +76,19 @@ class DynamicForm(BaseModel):
     fields: Dict[str,  Dict[str, str]]
     date_range: Dict[str, str]
     company_id: str
+    
+class Application(BaseModel):
+    app_name: str
+    app_url: str
+    company_id: str
+
+def app_helper(app) -> dict:
+    return {
+        "id": str(app["_id"]),
+        "app_name": app["app_name"],
+        "app_url": app["app_url"],
+        "company_id": app["company_id"],
+    }
 
 # Helper functions
 def user_helper(user) -> dict:
@@ -275,6 +289,27 @@ async def update_user_profile(company_id: str, data: UserBase):
     
     raise HTTPException(status_code=400, detail="Failed to update user profile")
 
+# API Endpoint for adding a new application
+@app.post("/add_app")
+async def add_app(app: Application):
+    app_data = app.dict()
+
+    # Check for uniqueness of application name and URL
+    existing_app_name = await app_collection.find_one({"app_name": app_data["app_name"], "company_id": app_data["company_id"]})
+    existing_app_url = await app_collection.find_one({"app_url": app_data["app_url"], "company_id": app_data["company_id"]})
+
+    if existing_app_name:
+        raise HTTPException(status_code=400, detail="Application name already exists for this company.")
+    
+    if existing_app_url:
+        raise HTTPException(status_code=400, detail="Application URL already exists for this company.")
+
+    # If unique, insert the new application
+    result = await app_collection.insert_one(app_data)
+    if result.inserted_id:
+        return {"status": "Success", "message": "Application added successfully", "app_id": str(result.inserted_id)}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to add application")
 
 if __name__ == "__main__":
     import uvicorn

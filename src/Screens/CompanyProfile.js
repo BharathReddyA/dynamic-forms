@@ -170,13 +170,13 @@ export default function ProfilePage() {
             </Form.Group>
             {isEditing ? (
               <>
-                <Button variant="primary" type="submit" className="mt-3">
+                <Button variant="primary" type="submit" className="CustomButton M5">
                   Save
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={handleCancel}
-                  className="mt-3 mx-2"
+                  className="CustomButton M5"
                 >
                   Cancel
                 </Button>
@@ -185,7 +185,7 @@ export default function ProfilePage() {
               <Button
                 variant="primary"
                 onClick={handleEditToggle}
-                className="mt-3"
+                className="CustomButton M5"
               >
                 Edit Form
               </Button>

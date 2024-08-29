@@ -9,6 +9,7 @@ import AddUser from "./Components/AddUser";
 import AddForms from "./Components/AddForms";
 import ViewForms from "./Components/ViewForms";
 import VerifyAccount from "./Components/VerifyAccount";
+import AddApp from "./Components/AddApp";
 import ViewUserFilledForms from "./Components/ViewUserFilledForms";
 import CompanyRegistration from "./Screens/CompanyRegistration";
 import CompanyLogin from "./Screens/CompanyLogin";
@@ -35,6 +36,7 @@ function App() {
         {isLoggedIn && (
           <nav className="side-nav">
             <Link to="/add-user">Add Users</Link>
+            <Link to="/add-application">Add Application</Link>
             <Link to="/add-forms">Add Forms</Link>
             <Link to="/view-forms">View Forms</Link>
             <Link to="/view-user-filled-forms">View User Filled Forms</Link>
@@ -87,6 +89,7 @@ function App() {
               <Route path="/admin" element={<Admin />} />
               <Route path="/add-user" element={<AddUser />} />
               <Route path="/add-forms" element={<AddForms />} />
+              <Route path="/add-application" element={<AddApp />} />
               <Route path="/view-forms" element={<ViewForms />} />
               <Route path="/verify-account" element={<VerifyAccount />} />
               <Route path="/company-profile" element={<CompanyProfile />} />

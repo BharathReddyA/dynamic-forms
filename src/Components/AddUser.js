@@ -3,7 +3,7 @@ import "../App.css";
 import { Card, Button, Row, Col, InputGroup, FormControl, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
-import Field from "./Field"; // Ensure the correct import path
+import Field from "./Field";
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
