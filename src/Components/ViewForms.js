@@ -1,67 +1,99 @@
-import React, { useState } from "react";
-import { Container, Form, Button, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Card, Button, Row } from "react-bootstrap";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ViewForms = () => {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [forms, setForms] = useState([]);
-
+  const [apps, setApps] = useState([]);
+  const location = useLocation();
+  const { appId, appName } = location.state || {};
   const companyId = useSelector((state) => state.company.companyId);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/dynamic_forms_by_company_and_date",
-        {
-          params: {
-            company_id: companyId,
-            start_date: startDate,
-            end_date: endDate,
-          },
-        }
-      );
-      console.log("API Response:", response.data);
-      setForms(response.data);
-    } catch (error) {
-      console.error("Error fetching forms:", error);
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:8000/dynamic_forms_by_app",
+          {
+            params: {
+              company_id: companyId,
+              app_id: appId,
+            },
+          }
+        );
+        console.log("API Response:", response.data);
+        setForms(response.data);
+      } catch (error) {
+        console.error("Error fetching forms:", error);
+      }
+    };
+
+    if (appId && companyId) {
+      fetchForms();
     }
+  }, [appId, companyId]);
+
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/view_apps/${companyId}`
+        );
+        console.log("Apps Response:", response.data);
+        setApps(response.data);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+      }
+    };
+
+    if (!appId && companyId) {
+      fetchApps();
+    }
+  }, [companyId, appId]);
+
+  const handleAppSelect = (selectedAppId, selectedAppName) => {
+    navigate("/view-forms", {
+      state: { appId: selectedAppId, appName: selectedAppName },
+    });
   };
+
+  if (!appId) {
+    return (
+      <Container fluid className="p-5">
+        <h3> Select an Application</h3>
+        <div className="view-app-container">
+          <Row>
+            {apps.length > 0 ? (
+              apps.map((app, index) => (
+                <Card key={index} className="mb-3 dashboardApps">
+                  <Card.Body>
+                    <Card.Title>{app.app_name}</Card.Title>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleAppSelect(app.id, app.app_name)}
+                      className="AppUrlButton"
+                    >
+                      View Forms
+                    </Button>
+                  </Card.Body>
+                </Card>
+              ))
+            ) : (
+              <p>No applications found.</p>
+            )}
+          </Row>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <div>
-      <Container className="mt-5">
-        <h1>View Forms by Date Range</h1>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group controlId="formDateRange" className="mb-3">
-            <Row>
-              <Col>
-                <Form.Label>Start Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  required
-                />
-              </Col>
-              <Col>
-                <Form.Label>End Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  required
-                />
-              </Col>
-            </Row>
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Search
-          </Button>
-        </Form>
+      <Container className="">
+        <h1>Forms for Application: {appName}</h1>
 
         <h3 className="mt-4">Forms</h3>
         {forms.length > 0 ? (
@@ -83,7 +115,7 @@ const ViewForms = () => {
             </div>
           ))
         ) : (
-          <p>No forms found for the selected date range.</p>
+          <p>No forms found for this application.</p>
         )}
       </Container>
     </div>

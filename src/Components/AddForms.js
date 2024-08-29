@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Row, Col, Card } from 'react-bootstrap';
 import FieldInput from './FieldInput';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AddForms = () => {
-  const companyId = useSelector((state) => state.company.companyId); // Get the companyId from Redux store
+  const companyId = useSelector((state) => state.company.companyId);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [fields, setFields] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
+  const [apps, setApps] = useState([]);
+  const location = useLocation();
+  const { appId, appName } = location.state || {};
   const addField = (field) => {
     setFields([...fields, field]);
   };
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +30,8 @@ const AddForms = () => {
       fields: fields.reduce((acc, field) => ({ ...acc, [field.name]: { type: field.type } }), {}),
       date_range: { startDate, endDate },
       company_id: companyId,
+      app_name: appName,
+      app_id: appId,
     };
 
     try {
@@ -42,6 +49,59 @@ const AddForms = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/view_apps/${companyId}`
+        );
+        console.log("Apps Response:", response.data);
+        setApps(response.data);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+      }
+    };
+
+    if (!appId && companyId) {
+      fetchApps();
+    }
+  }, [companyId, appId]);
+
+  const handleAppSelect = (selectedAppId, selectedAppName) => {
+    navigate("/add-forms", {
+      state: { appId: selectedAppId, appName: selectedAppName },
+    });
+  };
+
+  if (!appId) {
+    return (
+      <Container fluid className="p-5">
+        <h3> Select an Application</h3>
+        <div className="view-app-container">
+          <Row>
+            {apps.length > 0 ? (
+              apps.map((app, index) => (
+                <Card key={index} className="mb-3 dashboardApps">
+                  <Card.Body>
+                    <Card.Title>{app.app_name}</Card.Title>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleAppSelect(app.id, app.app_name)}
+                      className="AppUrlButton"
+                    >
+                      View Forms
+                    </Button>
+                  </Card.Body>
+                </Card>
+              ))
+            ) : (
+              <p>No applications found.</p>
+            )}
+          </Row>
+        </div>
+      </Container>
+    );
+  }
   return (
     <Container className="py-5">
       <Card className="CustomCard">
@@ -96,8 +156,18 @@ const AddForms = () => {
           <Form.Label>Company ID</Form.Label>
           <Form.Control
             type="text"
-            value={companyId}  // Automatically set the value from Redux
-            disabled           // Disable the field so the user can't change it
+            value={companyId}  
+            disabled           
+            required
+          />
+        </Form.Group>
+
+        <Form.Group controlId="formCompanyId" className="mb-3">
+          <Form.Label>Application Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={appName}  
+            disabled          
             required
           />
         </Form.Group>

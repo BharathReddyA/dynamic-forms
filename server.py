@@ -74,7 +74,8 @@ class DynamicForm(BaseModel):
     fields: Dict[str, Dict[str, str]]
     date_range: Dict[str, str]
     company_id: str
-    
+    app_name: str
+    app_id: str    
 class Application(BaseModel):
     app_name: str
     app_url: str
@@ -225,34 +226,37 @@ async def login_user(data: UserLogin, company_id: str):
 @app.post("/dynamic_form")
 async def create_dynamic_form(form: DynamicForm):
     form_data = form.dict()
+    form_data["app_id"] = ObjectId(form_data["app_id"])
     result = await form_collection.insert_one(form_data)
     if result.inserted_id:
         return {"status": "Success", "message": "Form created successfully"}
     else:
         raise HTTPException(status_code=500, detail="Failed to create form")
 
-@app.get("/dynamic_forms_by_company_and_date")
-async def get_dynamic_forms_by_company_and_date(company_id: str, start_date: str, end_date: str):
+@app.get("/dynamic_forms_by_app")
+async def get_dynamic_forms_by_app(company_id: str, app_id: str):
     try:
-        # No need to convert start_date and end_date to datetime objects since they are strings in the database
-        logging.info(f"Company ID: {company_id}")
-        logging.info(f"Start Date: {start_date}")
-        logging.info(f"End Date: {end_date}")
+        logging.info(f"Fetching forms for Company ID: {company_id}, App ID: {app_id}")
+
+        # Ensure app_id is treated as ObjectId
+        query = {
+            "company_id": company_id,
+            "app_id": ObjectId(app_id)  # Convert app_id to ObjectId
+        }
 
         forms = []
-        async for form in form_collection.find({
-            "company_id": company_id,
-            "date_range.startDate": {"$gte": start_date},
-            "date_range.endDate": {"$lte": end_date}
-        }):
-            form["_id"] = str(form["_id"])  # Convert ObjectId to string
+        async for form in form_collection.find(query):
+            # Convert ObjectId fields to strings
+            form["_id"] = str(form["_id"])
+            form["app_id"] = str(form["app_id"])
             forms.append(form)
 
         logging.info(f"Forms found: {len(forms)}")
         return forms
     except Exception as e:
+        logging.error(f"Error retrieving forms: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 # API Endpoint to get user profile data
 @app.get("/user_profile/{user_id}")
 async def get_user_profile(user_id: str):
@@ -337,47 +341,56 @@ async def get_app_details(app_id: str):
 
 @app.put("/update_app/{app_id}")
 async def update_app(app_id: str, app_data: UpdateAppModel):
-    # Ensure the app_id is valid
-    if not ObjectId.is_valid(app_id):
-        raise HTTPException(status_code=400, detail="Invalid app_id format")
-
-    # Fetch the current application details to check for name and URL conflicts
-    existing_app = await app_collection.find_one({"_id": ObjectId(app_id)})
-
-    if not existing_app:
-        raise HTTPException(status_code=404, detail="Application not found")
-
-    # Check for uniqueness of application name (excluding the current application)
-    if app_data.app_name and app_data.app_name != existing_app.get("app_name"):
-        existing_app_name = await app_collection.find_one({
-            "app_name": app_data.app_name,
-            "company_id": existing_app["company_id"],
-            "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
-        })
-        if existing_app_name:
-            raise HTTPException(status_code=400, detail="Application name already exists for this company.")
-    
-    # Check for uniqueness of application URL (excluding the current application)
-    if app_data.app_url and app_data.app_url != existing_app.get("app_url"):
-        existing_app_url = await app_collection.find_one({
-            "app_url": app_data.app_url,
-            "company_id": existing_app["company_id"],
-            "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
-        })
-        if existing_app_url:
-            raise HTTPException(status_code=400, detail="Application URL already exists for this company.")
-
     try:
+        # Ensure the app_id is valid
+        if not ObjectId.is_valid(app_id):
+            raise HTTPException(status_code=400, detail="Invalid app_id format")
+
+        # Fetch the current application details
+        existing_app = await app_collection.find_one({"_id": ObjectId(app_id)})
+
+        # if not existing_app:
+        #     raise HTTPException(status_code=404, detail="Application not found")
+
+        # Check for uniqueness of application name (excluding the current application)
+        if app_data.app_name and app_data.app_name != existing_app.get("app_name"):
+            existing_app_name = await app_collection.find_one({
+                "app_name": app_data.app_name,
+                "company_id": existing_app["company_id"],
+                "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
+            })
+            if existing_app_name:
+                raise HTTPException(status_code=400, detail="Application name already exists for this company.")
+        
+        # Check for uniqueness of application URL (excluding the current application)
+        if app_data.app_url and app_data.app_url != existing_app.get("app_url"):
+            existing_app_url = await app_collection.find_one({
+                "app_url": app_data.app_url,
+                "company_id": existing_app["company_id"],
+                "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
+            })
+            if existing_app_url:
+                raise HTTPException(status_code=400, detail="Application URL already exists for this company.")
+
+        # Proceed with the update operation
         update_result = await app_collection.update_one(
             {"_id": ObjectId(app_id)},
             {"$set": app_data.dict(exclude_unset=True)}
         )
+        
         if update_result.modified_count == 1:
             return {"msg": "Application updated successfully"}
         else:
             raise HTTPException(status_code=404, detail="Application not found")
+    
+    except HTTPException as http_exc:
+        # Reraise HTTP exceptions to be caught by FastAPI
+        raise http_exc
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Log the full error message and raise a detailed HTTP exception
+        print(f"Unexpected error during update_app operation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn
