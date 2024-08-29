@@ -246,6 +246,35 @@ async def get_dynamic_forms_by_company_and_date(company_id: str, start_date: str
         return forms
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+# API Endpoint to get user profile data
+@app.get("/user_profile/{user_id}")
+async def get_user_profile(user_id: str):
+    # Assuming user_id is the company_id here
+    try:
+        user = await user_collection.find_one({"company_id": user_id})
+        if user:
+            return user_helper(user)
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# API Endpoint to update user profile data
+@app.put("/user_profile/{company_id}", response_model=User)
+async def update_user_profile(company_id: str, data: UserBase):
+    # Exclude fields that shouldn't be updated
+    update_data = {k: v for k, v in data.dict().items() if k not in ["email", "company_id"]}
+    
+    # Update the user using company_id
+    result = await user_collection.update_one({"company_id": company_id}, {"$set": update_data})
+    
+    if result.modified_count == 1:
+        updated_user = await user_collection.find_one({"company_id": company_id})
+        return user_helper(updated_user)
+    
+    raise HTTPException(status_code=400, detail="Failed to update user profile")
+
 
 if __name__ == "__main__":
     import uvicorn
