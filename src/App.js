@@ -14,6 +14,8 @@ import ViewUserFilledForms from "./Components/ViewUserFilledForms";
 import CompanyRegistration from "./Screens/CompanyRegistration";
 import CompanyLogin from "./Screens/CompanyLogin";
 import CompanyProfile from "./Screens/CompanyProfile";
+import ViewApps from "./Screens/ViewApps";
+import AppDetails from "./Screens/AppDetails";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,6 +40,7 @@ function App() {
             <Link to="/">Home</Link>
             <Link to="/add-user">Add Users</Link>
             <Link to="/add-application">Add Application</Link>
+            <Link to="/view-apps">View Apps</Link>
             <Link to="/add-forms">Add Forms</Link>
             <Link to="/view-forms">View Forms</Link>
             <Link to="/view-user-filled-forms">View User Filled Forms</Link>
@@ -97,6 +100,8 @@ function App() {
               <Route path="/view-forms" element={<ViewForms />} />
               <Route path="/verify-account" element={<VerifyAccount />} />
               <Route path="/company-profile" element={<CompanyProfile />} />
+              <Route path="/view-apps" element={<ViewApps />} />
+              <Route path="/app-details/:appId" element={<AppDetails />} />
               <Route
                 path="/CompanyRegistration"
                 element={<CompanyRegistration />}

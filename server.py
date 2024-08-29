@@ -39,9 +39,7 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    phone_number: str = Field(
-        pattern=r'^\+?[1-9]\d{1,14}$'
-    )
+    phone_number: str = Field(pattern=r'^\+?[1-9]\d{1,14}$')
     company: str
 
 class UserCreate(UserBase):
@@ -73,7 +71,7 @@ class FormField(BaseModel):
 class DynamicForm(BaseModel):
     title: str
     description: str
-    fields: Dict[str,  Dict[str, str]]
+    fields: Dict[str, Dict[str, str]]
     date_range: Dict[str, str]
     company_id: str
     
@@ -81,6 +79,10 @@ class Application(BaseModel):
     app_name: str
     app_url: str
     company_id: str
+
+class UpdateAppModel(BaseModel):
+    app_name: Optional[str] = None
+    app_url: Optional[str] = None
 
 def app_helper(app) -> dict:
     return {
@@ -156,18 +158,9 @@ async def register_user(data: UserCreate):
             Username=user_data['email'],
             Password=user_data['password'],  # Use the password provided by the user
             UserAttributes=[
-                {
-                    'Name': 'email',
-                    'Value': user_data['email']
-                },
-                {
-                    'Name': 'phone_number',
-                    'Value': user_data['phone_number']
-                },
-                {
-                    'Name': 'custom:CompanyID',
-                    'Value': company_id
-                }
+                {'Name': 'email', 'Value': user_data['email']},
+                {'Name': 'phone_number', 'Value': user_data['phone_number']},
+                {'Name': 'custom:CompanyID', 'Value': company_id}
             ]
         )
     except ClientError as e:
@@ -237,7 +230,6 @@ async def create_dynamic_form(form: DynamicForm):
         return {"status": "Success", "message": "Form created successfully"}
     else:
         raise HTTPException(status_code=500, detail="Failed to create form")
-
 
 @app.get("/dynamic_forms_by_company_and_date")
 async def get_dynamic_forms_by_company_and_date(company_id: str, start_date: str, end_date: str):
@@ -314,13 +306,76 @@ async def add_app(app: Application):
 @app.get("/view_apps/{company_id}")
 async def get_apps_by_company(company_id: str):
     try:
+        logging.info(f"Searching for apps with company_id: {company_id}")
         apps = []
         async for app in app_collection.find({"company_id": company_id}):
+            logging.info(f"Found app: {app}")
             apps.append(app_helper(app))
         if apps:
             return apps
         else:
+            logging.warning(f"No applications found for company_id: {company_id}")
             raise HTTPException(status_code=404, detail="No applications found for this company")
+    except Exception as e:
+        logging.error(f"Error retrieving applications: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/view_app_details/{app_id}")
+async def get_app_details(app_id: str):
+    try:
+        logging.info(f"Searching for app with app_id: {app_id}")
+        app = await app_collection.find_one({"_id": ObjectId(app_id)})
+        if app:
+            logging.info(f"Found app: {app}")
+            return app_helper(app)
+        else:
+            logging.warning(f"No application found with app_id: {app_id}")
+            raise HTTPException(status_code=404, detail="No application found with the provided ID")
+    except Exception as e:
+        logging.error(f"Error retrieving application: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/update_app/{app_id}")
+async def update_app(app_id: str, app_data: UpdateAppModel):
+    # Ensure the app_id is valid
+    if not ObjectId.is_valid(app_id):
+        raise HTTPException(status_code=400, detail="Invalid app_id format")
+
+    # Fetch the current application details to check for name and URL conflicts
+    existing_app = await app_collection.find_one({"_id": ObjectId(app_id)})
+
+    if not existing_app:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    # Check for uniqueness of application name (excluding the current application)
+    if app_data.app_name and app_data.app_name != existing_app.get("app_name"):
+        existing_app_name = await app_collection.find_one({
+            "app_name": app_data.app_name,
+            "company_id": existing_app["company_id"],
+            "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
+        })
+        if existing_app_name:
+            raise HTTPException(status_code=400, detail="Application name already exists for this company.")
+    
+    # Check for uniqueness of application URL (excluding the current application)
+    if app_data.app_url and app_data.app_url != existing_app.get("app_url"):
+        existing_app_url = await app_collection.find_one({
+            "app_url": app_data.app_url,
+            "company_id": existing_app["company_id"],
+            "_id": {"$ne": ObjectId(app_id)}  # Exclude current application
+        })
+        if existing_app_url:
+            raise HTTPException(status_code=400, detail="Application URL already exists for this company.")
+
+    try:
+        update_result = await app_collection.update_one(
+            {"_id": ObjectId(app_id)},
+            {"$set": app_data.dict(exclude_unset=True)}
+        )
+        if update_result.modified_count == 1:
+            return {"msg": "Application updated successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Application not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
