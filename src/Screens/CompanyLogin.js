@@ -61,6 +61,8 @@ export default function CompanyLogin({ setIsLoggedIn }) {
         })
         .then((data) => {
           const companyId = formData.companyID;
+          const authToken = data.access_token;
+          localStorage.setItem("authToken", authToken);
           console.log("Success:", data);
           setIsLoggedIn(true);
           setFormData({

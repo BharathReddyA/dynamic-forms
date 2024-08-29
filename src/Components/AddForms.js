@@ -76,7 +76,7 @@ const AddForms = () => {
   if (!appId) {
     return (
       <Container fluid className="p-5">
-        <h3> Select an Application</h3>
+        <h3> Select an Application to create new form</h3>
         <div className="view-app-container">
           <Row>
             {apps.length > 0 ? (

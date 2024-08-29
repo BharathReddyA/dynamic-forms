@@ -16,6 +16,7 @@ import CompanyLogin from "./Screens/CompanyLogin";
 import CompanyProfile from "./Screens/CompanyProfile";
 import ViewApps from "./Screens/ViewApps";
 import AppDetails from "./Screens/AppDetails";
+import PrivateRoute from "./Components/PrivateRoute";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,9 +28,28 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === "authToken") {
+        if (!event.newValue) {
+          setIsLoggedIn(false);
+        } else {
+          setIsLoggedIn(true);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("authToken");
+    window.location.href = "/CompanyLogin";
   };
 
   return (
@@ -94,14 +114,70 @@ function App() {
                 }
               />
               <Route path="/admin" element={<Admin />} />
-              <Route path="/add-user" element={<AddUser />} />
-              <Route path="/add-forms" element={<AddForms />} />
-              <Route path="/add-application" element={<AddApp />} />
-              <Route path="/view-forms" element={<ViewForms />} />
+              <Route
+                path="/add-user"
+                element={
+                  <PrivateRoute
+                    element={<AddUser />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
+              <Route
+                path="/add-forms"
+                element={
+                  <PrivateRoute
+                    element={<AddForms />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
+              <Route
+                path="/add-application"
+                element={
+                  <PrivateRoute
+                    element={<AddApp />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
+              <Route
+                path="/view-forms"
+                element={
+                  <PrivateRoute
+                    element={<ViewForms />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
               <Route path="/verify-account" element={<VerifyAccount />} />
-              <Route path="/company-profile" element={<CompanyProfile />} />
-              <Route path="/view-apps" element={<ViewApps />} />
-              <Route path="/app-details/:appId" element={<AppDetails />} />
+              <Route
+                path="/company-profile"
+                element={
+                  <PrivateRoute
+                    element={<CompanyProfile />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
+              <Route
+                path="/view-apps"
+                element={
+                  <PrivateRoute
+                    element={<ViewApps />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
+              <Route
+                path="/app-details/:appId"
+                element={
+                  <PrivateRoute
+                    element={<AppDetails />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
+              />
               <Route
                 path="/CompanyRegistration"
                 element={<CompanyRegistration />}
@@ -112,7 +188,12 @@ function App() {
               />
               <Route
                 path="/view-user-filled-forms"
-                element={<ViewUserFilledForms />}
+                element={
+                  <PrivateRoute
+                    element={<ViewUserFilledForms />}
+                    isLoggedIn={isLoggedIn}
+                  />
+                }
               />
             </Routes>
           </Container>
