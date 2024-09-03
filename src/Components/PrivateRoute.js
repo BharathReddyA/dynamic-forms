@@ -1,8 +1,8 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-const PrivateRoute = ({ element: Component, isLoggedIn, ...rest }) => {
-  return isLoggedIn ? Component : <Navigate to="/CompanyLogin" replace />;
+const PrivateRoute = ({ isLoggedIn }) => {
+  return isLoggedIn ? <Outlet /> : <Navigate to="/CompanyLogin" replace />;
 };
 
 export default PrivateRoute;

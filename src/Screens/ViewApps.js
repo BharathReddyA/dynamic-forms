@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 import { useSelector } from "react-redux";
+import { useAuth } from '../authContext';
 
 export default function ViewApps() {
   const [apps, setApps] = useState([]);
   const companyId = useSelector((state) => state.company.companyId);
   const navigate = useNavigate();
+  const { isLoggedIn, logout } = useAuth();
 
   useEffect(() => {
     const fetchAppsData = async () => {
@@ -26,16 +28,26 @@ export default function ViewApps() {
         setApps(response.data);
       } catch (error) {
         console.error("Failed to fetch apps", error);
+        if (error.response && error.response.status === 401) {
+          logout();
+          navigate("/CompanyLogin");
+        }
       }
     };
 
     fetchAppsData();
-  }, [companyId]);
+  }, [companyId, logout, navigate]);
 
   const handleAppClick = (app) => {
     // Navigate to the AppDetails page, passing the app ID as a route parameter
     navigate(`/app-details/${app.id}`);
   };
+
+  if (!isLoggedIn) {
+    // Optionally, you can check if the user is logged in and redirect if not
+    navigate("/CompanyLogin");
+    return null;
+  }
 
   if (!apps.length) {
     return <p>Loading...</p>;
