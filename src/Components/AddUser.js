@@ -201,7 +201,7 @@ export default function AddUser() {
             disabled
             error={errors.app_name}
           />
-          <Field
+          {/* <Field
             FieldName="App ID"
             FieldType="text"
             name="app_id"
@@ -216,7 +216,7 @@ export default function AddUser() {
             value={companyId}
             disabled
             error={errors.company_id}
-          />
+          /> */}
           <Row className="MX5">
             <Col lg={2}>
               <label>Location</label>

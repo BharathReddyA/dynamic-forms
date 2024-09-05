@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Card, Row, Col, Button } from "react-bootstrap";
+import { Container, Card, Row, Button } from "react-bootstrap";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -65,13 +65,12 @@ const ViewAppUsers = ({appName}) => {
       <Button onClick={handleAddUsers}>Add Users</Button>
       <Row>
         {users.map((user, index) => (
-          <Col key={index} lg={4} md={6} sm={12}>
-            <Card className="mb-4 CustomCard">
-              <p>{`${user.first_name} ${user.last_name}`}</p>
-              <p>{user.email}</p>
-              <p>{appName}</p> {/* Display the appName */}
+          <Row key={index}>
+            <Card className="mb-4 userDetailsCard">
+              <p className="userDetailsText">{`${user.first_name} ${user.last_name}`}</p>
+              <p className="userDetailsText">{user.email}</p>
             </Card>
-          </Col>
+          </Row>
         ))}
       </Row>
     </Container>
