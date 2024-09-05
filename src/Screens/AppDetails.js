@@ -11,8 +11,9 @@ import {
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../App.css";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 import ViewFormsSummary from "../Components/ViewFormsSummary";
+import ViewAppUsers from "../Components/ViewAppUsers";
 
 export default function AppDetails() {
   const { appId } = useParams();
@@ -20,41 +21,10 @@ export default function AppDetails() {
   const [originalData, setOriginalData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [userDetails, setUserDetails] = useState(null);
+  // const [userDetails, setUserDetails] = useState(null);
   const navigate = useNavigate();
 
-  const companyId = useSelector((state) => state.company.companyId);
-
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!companyId) {
-        console.error("Company Id is undefined");
-        return;
-      }
-
-      try {
-        console.log("Fetching profile data for user ID:", companyId);
-        const response = await axios.get(
-          `http://127.0.0.1:8000/user_profile/${companyId}`
-        );
-        console.log("API response:", response.data);
-
-        const userData = {
-          fullName: `${response.data.first_name} ${response.data.last_name}`,
-          companyName: response.data.company,
-          phoneNumber: response.data.phone_number,
-          email: response.data.email,
-          companyId: response.data.company_id,
-        };
-        setUserDetails(userData);
-        setOriginalData(userData);
-      } catch (error) {
-        console.error("Failed to fetch user profile", error);
-      }
-    };
-
-    fetchProfileData();
-  }, [companyId]);
+  // const companyId = useSelector((state) => state.company.companyId);
 
   useEffect(() => {
     const fetchAppData = async () => {
@@ -135,11 +105,15 @@ export default function AppDetails() {
   }
 
   const handleAddForm = (app) => {
-    navigate(`/add-forms`, { state: { appId: appId, appName: formData.app_name } });
+    navigate(`/add-forms`, {
+      state: { appId: appId, appName: formData.app_name },
+    });
   };
 
   const handleViewForms = (app) => {
-    navigate(`/view-forms`, { state: { appId: appId, appName: formData.app_name } });
+    navigate(`/view-forms`, {
+      state: { appId: appId, appName: formData.app_name },
+    });
   };
 
   return (
@@ -226,10 +200,18 @@ export default function AppDetails() {
               <Button variant="primary" className="CustomButton M5">
                 Open Application
               </Button>
-              <Button variant="primary" onClick={() => handleAddForm(formData)} className="CustomButton M5">
+              <Button
+                variant="primary"
+                onClick={() => handleAddForm(formData)}
+                className="CustomButton M5"
+              >
                 Add Forms
               </Button>
-              <Button variant="primary" onClick={() => handleViewForms(formData)} className="CustomButton M5">
+              <Button
+                variant="primary"
+                onClick={() => handleViewForms(formData)}
+                className="CustomButton M5"
+              >
                 View Created Forms
               </Button>
               <Button variant="primary" className="CustomButton M5">
@@ -254,65 +236,11 @@ export default function AppDetails() {
         </Row>
         <Row className="py-4">
           <Col lg={5}>
-            <h4>List of users for "{formData.app_name}"</h4>
-            <Card className="CustomCard">
-              <Card className="userDetailsCard">
-                <Row>
-                  <Col lg={6}>
-                    <p className="userDetailsText">{userDetails.fullName}</p>
-                    <p className="userDetailsText">{userDetails.email}</p>
-                    <p className="userDetailsText">{userDetails.phone}</p>
-                  </Col>
-                  <Col lg={3}></Col>
-                  <Col lg={3}>
-                    <p>Permissions</p>
-                  </Col>
-                </Row>
-              </Card>
-              <Card className="userDetailsCard">
-                <Row>
-                  <Col lg={6}>
-                    <p className="userDetailsText">{userDetails.fullName}</p>
-                    <p className="userDetailsText">{userDetails.email}</p>
-                    <p className="userDetailsText">{userDetails.phone}</p>
-                  </Col>
-                  <Col lg={3}></Col>
-                  <Col lg={3}>
-                    <p>Permissions</p>
-                  </Col>
-                </Row>
-              </Card>
-              <Card className="userDetailsCard">
-                <Row>
-                  <Col lg={6}>
-                    <p className="userDetailsText">{userDetails.fullName}</p>
-                    <p className="userDetailsText">{userDetails.email}</p>
-                    <p className="userDetailsText">{userDetails.phone}</p>
-                  </Col>
-                  <Col lg={3}></Col>
-                  <Col lg={3}>
-                    <p>Permissions</p>
-                  </Col>
-                </Row>
-              </Card>
-              <Card className="userDetailsCard">
-                <Row>
-                  <Col lg={6}>
-                    <p className="userDetailsText">{userDetails.fullName}</p>
-                    <p className="userDetailsText">{userDetails.email}</p>
-                    <p className="userDetailsText">{userDetails.phone}</p>
-                  </Col>
-                  <Col lg={3}></Col>
-                  <Col lg={3}>
-                    <p>Permissions</p>
-                  </Col>
-                </Row>
-              </Card>
-            </Card>
+            <ViewAppUsers appName={formData.app_name}/>
           </Col>
           <Col lg={6}>
             <Card className="CustomCard mt-4">
-              <ViewFormsSummary appId={appId} appName={formData.app_name}/>
+              <ViewFormsSummary appId={appId} appName={formData.app_name} />
             </Card>
           </Col>
         </Row>

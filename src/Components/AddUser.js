@@ -1,18 +1,28 @@
-import React, { useState } from "react";
-import "../App.css";
+import React, { useState, useEffect } from "react";
 import { Card, Button, Row, Col, InputGroup, FormControl, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Field from "./Field";
 
 export default function AddUser() {
+  const location = useLocation();
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
     phone_number: "",
     location: "",
+    app_name: "",
+    app_id: "",
+    company_id: "",
   });
+  const companyId = useSelector((state) => state.company.companyId);
+  const [apps, setApps] = useState([]);
+  const { appId, appName } = location.state || {};
+  const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
 
@@ -53,7 +63,12 @@ export default function AddUser() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          app_id: appId,
+          app_name: appName,
+          company_id: companyId,
+        }),
       })      
         .then((response) => response.json())
         .then((data) => {
@@ -64,6 +79,9 @@ export default function AddUser() {
             email: "",
             phone_number: "",
             location: "",
+            app_id: appId,
+            app_name: appName,
+            company_id: companyId,
           });
           setErrors({});
         })
@@ -83,6 +101,60 @@ export default function AddUser() {
     });
     setErrors({});
   };
+
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/view_apps/${companyId}`
+        );
+        console.log("Apps Response:", response.data);
+        setApps(response.data);
+      } catch (error) {
+        console.error("Error fetching applications:", error);
+      }
+    };
+
+    if (!appId && companyId) {
+      fetchApps();
+    }
+  }, [companyId, appId]);
+
+  const handleAppSelect = (selectedAppId, selectedAppName) => {
+    navigate("/add-user", {
+      state: { appId: selectedAppId, appName: selectedAppName },
+    });
+  };
+
+  if (!appId) {
+    return (
+      <Container fluid className="p-5">
+        <h3> Select an Application to create new form</h3>
+        <div className="view-app-container">
+          <Row>
+            {apps.length > 0 ? (
+              apps.map((app, index) => (
+                <Card key={index} className="mb-3 dashboardApps">
+                  <Card.Body>
+                    <Card.Title>{app.app_name}</Card.Title>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleAppSelect(app.id, app.app_name)}
+                      className="AppUrlButton"
+                    >
+                      Select Application
+                    </Button>
+                  </Card.Body>
+                </Card>
+              ))
+            ) : (
+              <p>No applications found.</p>
+            )}
+          </Row>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container className="pt-5">
@@ -120,6 +192,30 @@ export default function AddUser() {
             value={formData.phone_number}
             onChange={handleChange}
             error={errors.phone_number}
+          />
+          <Field
+            FieldName="App Name"
+            FieldType="text"
+            name="app_name"
+            value={appName}
+            disabled
+            error={errors.app_name}
+          />
+          <Field
+            FieldName="App ID"
+            FieldType="text"
+            name="app_id"
+            value={appId}
+            disabled
+            error={errors.app_id}
+          />
+          <Field
+            FieldName="Company ID"
+            FieldType="text"
+            name="company_id"
+            value={companyId}
+            disabled
+            error={errors.company_id}
           />
           <Row className="MX5">
             <Col lg={2}>

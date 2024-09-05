@@ -28,6 +28,7 @@ form_collection = database.get_collection("forms")
 filled_form_collection = database.get_collection("filled_forms")
 user_collection = database.get_collection("users")
 app_collection = database.get_collection("applications")
+app_user_collection = database.get_collection("app_users")
 
 # AWS Cognito setup
 cognito_client = boto3.client('cognito-idp', region_name='us-west-2')  
@@ -80,6 +81,16 @@ class Application(BaseModel):
     app_name: str
     app_url: str
     company_id: str
+    
+class ApplicationUsers(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    location: str
+    app_name: str
+    app_id: str
+    company_id: str
 
 class UpdateAppModel(BaseModel):
     app_name: Optional[str] = None
@@ -115,6 +126,20 @@ def form_helper(form) -> dict:
         "date_range": form["date_range"],
         "company_id": form["company_id"]
     }
+
+def app_user_helper(user) -> dict:
+    return {
+        "id": str(user["_id"]),
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "email": user["email"],
+        "phone_number": user["phone_number"],
+        "location": user["location"],
+        "company_id": user["company_id"],
+        "app_name": user["app_name"],
+        "app_id": str(user["app_id"]),
+    }
+
 
 async def update_email_verification_status(email: str):
     try:
@@ -391,6 +416,42 @@ async def update_app(app_id: str, app_data: UpdateAppModel):
         print(f"Unexpected error during update_app operation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+# API Endpoint for creating a user according to the application
+@app.post("/submit_user")
+async def create_app_user(app: ApplicationUsers):
+    user_data = app.dict()
+    user_data["app_id"] = ObjectId(user_data["app_id"])  # Convert app_id to ObjectId
+    try:
+        result = await app_user_collection.insert_one(user_data)  # Insert into app_user_collection
+        if result.inserted_id:
+            return {"status": "Success", "message": "User created successfully"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to create user")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+# API Endpoint to get the application user information
+@app.get("/get_app_users")
+async def get_app_users(company_id: str, app_id: str):
+    try:
+        logging.info(f"Fetching users for Company ID: {company_id}, App ID: {app_id}")
+
+        # Convert app_id to ObjectId
+        query = {
+            "company_id": company_id,
+            "app_id": ObjectId(app_id)  # Ensure app_id is treated as ObjectId
+        }
+
+        users = []
+        async for user in app_user_collection.find(query):
+            # Convert ObjectId fields to strings and append to the users list
+            users.append(app_user_helper(user))
+
+        logging.info(f"Users found: {len(users)}")
+        return users
+    except Exception as e:
+        logging.error(f"Error retrieving users: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
