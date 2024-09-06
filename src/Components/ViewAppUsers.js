@@ -4,7 +4,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const ViewAppUsers = ({appName}) => {
+const ViewAppUsers = ({ appName }) => {
   const { appId } = useParams();
   const companyId = useSelector((state) => state.company.companyId);
   const [users, setUsers] = useState([]);
@@ -54,15 +54,19 @@ const ViewAppUsers = ({appName}) => {
     return (
       <div>
         <p>No Users added for this application</p>
-        <Button onClick={handleAddUsers}>Add Users</Button>
+        <Button className="CustomButton M5" onClick={handleAddUsers}>
+          Add Users
+        </Button>
       </div>
     );
   }
 
   return (
-    <Container>
-      <h3>Users for Application: {appName}</h3> {/* Display the appName */}
-      <Button onClick={handleAddUsers}>Add Users</Button>
+    <Container fluid>
+      <h3>Users for Application: {appName}</h3>
+      <Button className="CustomButton mb-3" onClick={handleAddUsers}>
+        Add Users
+      </Button>
       <Row>
         {users.map((user, index) => (
           <Row key={index}>

@@ -109,6 +109,11 @@ export default function AppDetails() {
       state: { appId: appId, appName: formData.app_name },
     });
   };
+  const handleMenuAddUser = (app) => {
+    navigate(`/add-user`, {
+      state: { appId: appId, appName: formData.app_name },
+    });
+  };
 
   const handleViewForms = (app) => {
     navigate(`/view-forms`, {
@@ -217,7 +222,7 @@ export default function AppDetails() {
               <Button variant="primary" className="CustomButton M5">
                 View Approved Forms
               </Button>
-              <Button variant="primary" className="CustomButton M5">
+              <Button variant="primary" className="CustomButton M5" onClick={handleMenuAddUser}>
                 Add Users
               </Button>
             </Card>
@@ -228,7 +233,7 @@ export default function AppDetails() {
             <Card className="CustomCard mb-3 text-center">
               <h1>20</h1>
             </Card>
-            <h4>Number of approved forms for "{formData.app_name}"</h4>
+            <h4>Number of forms filled for "{formData.app_name}"</h4>
             <Card className="CustomCard text-center">
               <h1>10</h1>
             </Card>
@@ -236,7 +241,9 @@ export default function AppDetails() {
         </Row>
         <Row className="py-4">
           <Col lg={5}>
-            <ViewAppUsers appName={formData.app_name}/>
+            <Card className="CustomCard">
+              <ViewAppUsers appName={formData.app_name} />
+            </Card>
           </Col>
           <Col lg={6}>
             <Card className="CustomCard mt-4">
